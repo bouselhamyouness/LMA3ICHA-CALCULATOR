@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>LMA3ICHA CALCULATOR V1</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Tajawal:wght@500;700&display=swap');
+        
+        :root {
+            --primary: #4f46e5;
+            --bg-body: #f1f5f9;
+        }
+
+        /* استخدام dvh لحل مشكلة متصفحات الهاتف (Safari/Chrome) */
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--bg-body);
+            -webkit-font-smoothing: antialiased;
+            overscroll-behavior-y: none;
+            height: 100dvh; 
+            display: flex;
+            flex-direction: column;
+        }
+
+        .arabic-text { font-family: 'Tajawal', sans-serif; }
+
+        .glass-sidebar { 
+            background: linear-gradient(145deg, #0f172a 0%, #1e1b4b 100%);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        .modern-checkbox {
+            appearance: none;
+            width: 26px;
+            height: 26px;
+            border: 2px solid #cbd5e1;
+            border-radius: 8px;
+            background-color: #f8fafc;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+        .modern-checkbox:checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            transform: scale(1.1);
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+        }
+        .modern-checkbox:checked::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: white;
+            font-size: 14px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .custom-scrollbar { -webkit-overflow-scrolling: touch; }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        .sticky-col {
+            position: sticky;
+            left: 0;
+            background-color: #f8fafc;
+            z-index: 20;
+            border-right: 1px solid #e2e8f0;
+        }
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            background-color: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(8px);
+            z-index: 30;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .sticky-corner { z-index: 40 !important; background-color: #f8fafc; }
+
+        @keyframes heartBeat {
+            0%, 100% { transform: scale(1); }
+            15%, 45% { transform: scale(1.25); }
+            30% { transform: scale(1); }
+        }
+        .heart-icon {
+            display: inline-block;
+            animation: heartBeat 2s infinite;
+            color: #f43f5e;
+        }
+
+        /* حماية حواف شاشات الآيفون الحديثة */
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 1rem); }
+
+        @media print {
+            .no-print { display: none !important; }
+            .print-area { width: 100% !important; margin: 0 !important; overflow: visible !important; height: auto !important; }
+            .sticky-col { position: static; box-shadow: none; border: 1px solid #e2e8f0; }
+            body { display: block; height: auto; overflow: visible; }
+        }
+    </style>
+</head>
+<body class="lg:flex-row overflow-hidden">
+
+    <aside class="w-full lg:w-80 glass-sidebar text-white flex flex-col shrink-0 lg:h-full z-50 no-print transition-all duration-300">
+        <div class="p-5 lg:p-8 flex items-center justify-between lg:justify-start gap-4 border-b border-white/10">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 lg:w-12 lg:h-12 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <i class="fas fa-wallet text-lg lg:text-xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg lg:text-xl font-extrabold tracking-tight leading-none text-white">LMA3ICHA</h1>
+                    <span class="text-[9px] lg:text-[10px] font-bold uppercase tracking-[0.3em] text-indigo-400">Calculator V1</span>
+                </div>
+            </div>
+            <button onclick="window.print()" class="lg:hidden w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-white active:bg-white/20 transition-colors">
+                <i class="fas fa-print"></i>
+            </button>
+        </div>
+
+        <div class="p-4 lg:p-8 flex-1 overflow-y-auto custom-scrollbar">
+            <div class="mb-5 lg:mb-8">
+                <label class="text-[10px] font-black text-indigo-200 uppercase tracking-widest mb-2 block">Profil Collaborateur</label>
+                <div class="relative">
+                    <select id="categorySelect" class="w-full bg-slate-800/80 border border-slate-600 p-3 lg:p-4 rounded-xl text-sm font-semibold text-white focus:ring-2 focus:ring-indigo-500 outline-none appearance-none transition-all shadow-inner cursor-pointer">
+                        <option value="cadre">Cadre</option>
+                        <option value="maitrise">Maîtrise</option>
+                        <option value="execution">Exécution</option>
+                    </select>
+                    <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs"></i>
+                </div>
+            </div>
+
+            <div class="bg-white/5 border border-white/10 rounded-2xl p-4 lg:p-5 backdrop-blur-sm">
+                <div id="baremeDisplay" class="grid grid-cols-2 lg:grid-cols-1 gap-3 lg:gap-4">
+                    </div>
+            </div>
+        </div>
+
+        <div class="hidden lg:block p-8 border-t border-white/10 bg-slate-900/50">
+            <p class="text-[10px] text-indigo-200 uppercase font-bold tracking-widest mb-2">Total Mensuel</p>
+            <div id="desktopTotal" class="text-3xl font-black text-white">0.00 DH</div>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col h-full min-w-0 bg-white lg:bg-slate-50 overflow-hidden relative">
+        
+        <header class="hidden lg:flex h-20 bg-white/80 backdrop-blur-md border-b border-slate-200 items-center justify-between px-10 shrink-0 z-10 no-print">
+            <div>
+                <h2 class="text-xl font-extrabold text-slate-800 tracking-tight">Tableau des Frais</h2>
+                <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Mars 2026</p>
+            </div>
+            <div class="flex gap-4">
+                <button onclick="resetData()" class="h-11 px-5 bg-rose-50 text-rose-600 rounded-xl text-sm font-bold hover:bg-rose-500 hover:text-white transition-all shadow-sm flex items-center gap-2">
+                    <i class="fas fa-trash-alt"></i> Reset
+                </button>
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-auto custom-scrollbar print-area lg:p-8" id="scrollContainer">
+            <div class="lg:max-w-6xl mx-auto lg:bg-white lg:rounded-[2rem] lg:shadow-[0_8px_30px_rgb(0,0,0,0.04)] lg:border lg:border-slate-100 min-w-full lg:min-w-[750px] overflow-hidden">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr>
+                            <th class="sticky-header sticky-col sticky-corner p-3 lg:p-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-200 w-16 lg:w-24 text-center">Jour</th>
+                            <th class="sticky-header p-3 lg:p-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-200 text-center whitespace-nowrap">☕ Pt. Dej</th>
+                            <th class="sticky-header p-3 lg:p-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-200 text-center whitespace-nowrap">🍽️ Déjeuner</th>
+                            <th class="sticky-header p-3 lg:p-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-200 text-center whitespace-nowrap">🌙 Dîner</th>
+                            <th class="sticky-header p-3 lg:p-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-200 text-center whitespace-nowrap">🏨 Logement</th>
+                            <th class="sticky-header p-3 lg:p-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-200 text-right w-24 lg:w-32 bg-white">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-slate-100 lg:divide-slate-50">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+        <footer class="shrink-0 bg-white border-t border-slate-200 z-30 shadow-[0_-5px_20px_rgba(0,0,0,0.05)] no-print pb-safe">
+            
+            <div class="lg:hidden flex flex-col pt-3 pb-2 px-4 gap-3">
+                <div class="flex justify-between items-center">
+                    <button onclick="resetData()" class="w-11 h-11 bg-rose-50 rounded-xl flex items-center justify-center text-rose-600 active:bg-rose-100 transition-colors">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                    
+                    <div class="text-center flex-1">
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Total Mensuel</p>
+                        <div id="mobileTotal" class="text-2xl font-black text-indigo-600 leading-none">0.00 DH</div>
+                    </div>
+
+                    <button onclick="document.getElementById('scrollContainer').scrollTo({top:0, behavior:'smooth'})" class="w-11 h-11 bg-slate-100 rounded-xl flex items-center justify-center text-slate-600 active:bg-slate-200 transition-colors">
+                        <i class="fas fa-arrow-up"></i>
+                    </button>
+                </div>
+                
+                <div class="text-center">
+                    <p class="text-[10px] font-bold text-slate-500 flex items-center justify-center gap-1">
+                        Powered with love by <span class="text-indigo-600 font-black uppercase tracking-wider">Youness</span> <span class="heart-icon text-[10px]">❤️</span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="hidden lg:flex max-w-6xl mx-auto items-center justify-between p-4 px-8">
+                <p class="arabic-text text-slate-400 text-xs font-bold">
+                    جميع الحقوق محفوظة &copy; 2026 LMA3ICHA CALCULATOR V1
+                </p>
+                <p class="text-slate-500 text-[11px] font-bold flex items-center gap-1.5 uppercase tracking-wide">
+                    Powered with love by 
+                    <span class="text-indigo-600 font-black tracking-widest text-xs mx-0.5">YOUNESS</span>
+                    <span class="heart-icon text-sm">❤️</span>
+                </p>
+            </div>
+        </footer>
+
+    </main>
+
+    <script>
+        const rates = {
+            cadre: { ptDej: 60, dejeuner: 80, diner: 80, logement: 100 },
+            maitrise: { ptDej: 40, dejeuner: 60, diner: 60, logement: 80 },
+            execution: { ptDej: 40, dejeuner: 40, diner: 40, logement: 60 }
+        };
+
+        const config = { days: 31 };
+        
+        const selectCat = document.getElementById('categorySelect');
+        const baremeDiv = document.getElementById('baremeDisplay');
+        const tBody = document.getElementById('tableBody');
+        const deskTotal = document.getElementById('desktopTotal');
+        const mobTotal = document.getElementById('mobileTotal');
+
+        function init() {
+            renderTable();
+            updateRatesDisplay();
+            selectCat.addEventListener('change', () => {
+                updateRatesDisplay();
+                calculateTotals();
+            });
+        }
+
+        function renderTable() {
+            tBody.innerHTML = '';
+            for (let i = 1; i <= config.days; i++) {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-indigo-50/40 transition-colors duration-200';
+                tr.innerHTML = `
+                    <td class="sticky-col p-3 lg:p-5 text-center">
+                        <span class="inline-flex w-7 h-7 lg:w-8 lg:h-8 items-center justify-center bg-white border border-slate-200 lg:border-none lg:bg-slate-100 rounded-lg text-xs font-black text-slate-600 shadow-sm">
+                            ${i < 10 ? '0'+i : i}
+                        </span>
+                    </td>
+                    <td class="p-3 lg:p-5 text-center"><input type="checkbox" class="modern-checkbox calc-check" data-day="${i}" data-type="ptDej"></td>
+                    <td class="p-3 lg:p-5 text-center"><input type="checkbox" class="modern-checkbox calc-check" data-day="${i}" data-type="dejeuner"></td>
+                    <td class="p-3 lg:p-5 text-center"><input type="checkbox" class="modern-checkbox calc-check" data-day="${i}" data-type="diner"></td>
+                    <td class="p-3 lg:p-5 text-center"><input type="checkbox" class="modern-checkbox calc-check" data-day="${i}" data-type="logement"></td>
+                    <td class="p-3 lg:p-5 text-right bg-slate-50/50 lg:bg-transparent">
+                        <span id="day-sum-${i}" class="text-xs lg:text-sm font-black text-slate-300 transition-all duration-300">0.00</span>
+                    </td>
+                `;
+                tBody.appendChild(tr);
+            }
+
+            document.querySelectorAll('.calc-check').forEach(chk => {
+                chk.addEventListener('change', calculateTotals);
+            });
+        }
+
+        function updateRatesDisplay() {
+            const b = rates[selectCat.value];
+            baremeDiv.innerHTML = `
+                <div class="flex justify-between items-center text-[10px] lg:text-xs text-indigo-100"><span>☕ Pt.Dej</span><span class="font-black text-white bg-white/10 px-2 py-1 rounded">${b.ptDej} DH</span></div>
+                <div class="flex justify-between items-center text-[10px] lg:text-xs text-indigo-100"><span>🍽️ Déj</span><span class="font-black text-white bg-white/10 px-2 py-1 rounded">${b.dejeuner} DH</span></div>
+                <div class="flex justify-between items-center text-[10px] lg:text-xs text-indigo-100"><span>🌙 Dîner</span><span class="font-black text-white bg-white/10 px-2 py-1 rounded">${b.diner} DH</span></div>
+                <div class="flex justify-between items-center text-[10px] lg:text-xs text-indigo-100"><span>🏨 Logem.</span><span class="font-black text-white bg-white/10 px-2 py-1 rounded">${b.logement} DH</span></div>
+            `;
+        }
+
+        function calculateTotals() {
+            const b = rates[selectCat.value];
+            let globalSum = 0;
+
+            for (let i = 1; i <= config.days; i++) {
+                let daySum = 0;
+                document.querySelectorAll(`.calc-check[data-day="${i}"]:checked`).forEach(box => {
+                    daySum += b[box.dataset.type];
+                });
+
+                const dayDisp = document.getElementById(`day-sum-${i}`);
+                dayDisp.innerText = daySum.toFixed(2);
+                
+                if (daySum > 0) {
+                    dayDisp.className = "text-xs lg:text-sm font-black text-indigo-600 transform scale-110 inline-block";
+                } else {
+                    dayDisp.className = "text-xs lg:text-sm font-black text-slate-300";
+                }
+                globalSum += daySum;
+            }
+
+            const formattedTotal = new Intl.NumberFormat('fr-MA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(globalSum) + " DH";
+            deskTotal.innerText = formattedTotal;
+            mobTotal.innerText = formattedTotal;
+        }
+
+        function resetData() {
+            if(confirm("Réinitialiser le mois complet ?")) {
+                document.querySelectorAll('.calc-check').forEach(chk => chk.checked = false);
+                calculateTotals();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
